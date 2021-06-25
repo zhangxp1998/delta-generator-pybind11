@@ -20,8 +20,8 @@ def generate_proto(source):
   .proto file.  Does nothing if the output already exists and is newer than
   the input."""
 
-  header = Path("src/") / source.replace(".proto", ".pb.h")
-  cc_file = Path("src/") / source.replace(".proto", ".pb.cc")
+  header = source.replace(".proto", ".pb.h")
+  cc_file = source.replace(".proto", ".pb.cc")
   outputs = [header, cc_file]
   def should_regenerate(path):
       return not os.path.exists(path) or \
@@ -42,7 +42,6 @@ def generate_proto(source):
       sys.exit(-1)
 
     protoc_command = [ protoc, "-I./src", "-I.", "--cpp_out=src", source ]
-    print(protoc_command)
     if subprocess.call(protoc_command) != 0:
       sys.exit(-1)
 
@@ -51,7 +50,7 @@ generate_proto("src/update_metadata.proto")
 ext_modules = [
     Pybind11Extension(
         "delta_generator_pybind11",
-        sorted(glob("src/*.cpp")),  # Sort source files for reproducibility
+        sorted(glob("src/*.cpp") + sorted(glob("src/*.cc"))),  # Sort source files for reproducibility
     ),
 ]
 
